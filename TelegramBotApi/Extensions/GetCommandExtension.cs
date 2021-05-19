@@ -4,9 +4,9 @@
     using System.Linq;
     using TelegramBotApi.Commands;
 
-    public static class GetCommandExtension
+    internal static class GetCommandExtension
     {
-        public static ICommand GetCommandOrDefault(this IEnumerable<ICommand> commands, string commandName)
+        public static ICommand GetCommand(this IEnumerable<ICommand> commands, string commandName)
         {
             var command = commands.FirstOrDefault(c => c.GetType().Name.IsMatch($"^(?i){commandName}command$"));
 

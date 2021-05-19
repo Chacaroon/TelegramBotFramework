@@ -9,7 +9,7 @@
     using TelegramBotApi.Services.Abstraction;
     using TelegramBotApi.Types.ReplyMarkup;
 
-    public class CallbackQueryService : ICallbackQueryService
+    internal class CallbackQueryService : ICallbackQueryService
     {
         private readonly IEnumerable<ICommand> _commands;
         private readonly ITelegramBot _telegramBot;
@@ -29,7 +29,7 @@
                 callbackQuery.Message.Id,
                 callbackQuery.Data);
 
-            var command = _commands.GetCommandOrDefault(request.Query.GetCommand());
+            var command = _commands.GetCommand(request.Query.GetCommand());
 
             try
             {

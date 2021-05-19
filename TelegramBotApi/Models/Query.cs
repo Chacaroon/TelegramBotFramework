@@ -28,20 +28,20 @@
 
         public Dictionary<string, string> GetQueryParams()
         {
-            Dictionary<string, string> _params = new Dictionary<string, string>();
+            var @params = new Dictionary<string, string>();
 
-            Match match = new Regex(@"(?i)[a-z]+:?(?:([a-z]+)=([^,]+),?)*").Match(_text);
+            var match = new Regex(@"(?i)[a-z]+:?(?:([a-z]+)=([^,]+),?)*").Match(_text);
 
-            for (int i = 0; i < match.Groups[1].Captures.Count; i++)
+            for (var i = 0; i < match.Groups[1].Captures.Count; i++)
             {
-                _params.Add(match.Groups[1].Captures[i].Value,
+                @params.Add(match.Groups[1].Captures[i].Value,
                     match.Groups[2].Captures[i].Value);
             }
 
-            return _params;
+            return @params;
         }
 
-        public string GetQueryParam(string param)
+        public string? GetQueryParam(string param)
         {
             return GetQueryParams().GetValueOrDefault(param);
         }

@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using System.Net.Http;
-using System.Text;
-
-namespace TelegramBotApi.Types.Requests
+﻿namespace TelegramBotApi.Types.Requests
 {
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Serialization;
+    using System.Net.Http;
+    using System.Text;
+
     [JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
     internal class BaseRequest
     {

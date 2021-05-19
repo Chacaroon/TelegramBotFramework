@@ -7,11 +7,10 @@
     using TelegramBotApi.Extensions;
     using TelegramBotApi.Models;
     using TelegramBotApi.Repositories.Abstraction;
-    using TelegramBotApi.Repositories.Models;
     using TelegramBotApi.Services.Abstraction;
     using TelegramBotApi.Types;
 
-    public class MessageService : IMessageService
+    internal class MessageService : IMessageService
     {
         private readonly IEnumerable<ICommand> _commands;
         private readonly IUserRepository _userRepository;
@@ -37,7 +36,7 @@
 
         private async Task ProcessAsCommand(Message message)
         {
-            var command = _commands.GetCommandOrDefault(message.GetCommand());
+            var command = _commands.GetCommand(message.GetCommand());
 
             var request = new CommandRequest(
                 message.Chat.Id,
@@ -57,7 +56,7 @@
         {
             var user = _userRepository.GetAll(c => c.ChatId == message.Chat.Id).FirstOrDefault();
 
-            if (user.IsNullOrEmpty())
+            if (user == null)
             {
                 var tempRequest = new Request(message.Chat.Id, message.Text);
 
@@ -78,7 +77,7 @@
                 message.Text,
                 user.ChatState.WaitingFor);
 
-            var command = _commands.GetCommandOrDefault(request.Query.GetCommand());
+            var command = _commands.GetCommand(request.Query.GetCommand());
 
             try
             {

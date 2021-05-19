@@ -1,15 +1,18 @@
 ﻿namespace TelegramBotApi.Types
 {
     using TelegramBotApi.Types.Abstraction;
-    using TelegramBotApi.Types.ReplyMarkup;
+
+    #nullable disable
 
     public class MessageTemplate
     {
         public string Text { get; set; }
+
         public ParseMode ParseMode { get; set; }
+        
         public IReplyMarkup ReplyMarkup { get; set; }
 
-        public static MessageTemplate Create() => new MessageTemplate();
+        public static MessageTemplate Create() => new();
 
         public MessageTemplate SetText(string text)
         {
@@ -29,4 +32,7 @@
             return this;
         }
     }
+
+    #nullable restore
+
 }

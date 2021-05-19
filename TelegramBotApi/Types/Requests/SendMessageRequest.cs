@@ -10,9 +10,9 @@ namespace TelegramBotApi.Types.Requests
 
         public string Text { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public string ParseMode
+        public string? ParseMode
         {
-            get => _parseMode?.ToString();
+            get => _parseMode;
             set =>
                 _parseMode = value == Types.ParseMode.None.ToString()
                 ? null
@@ -25,9 +25,9 @@ namespace TelegramBotApi.Types.Requests
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long ReplyToMessageId { get; set; }
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
-        public IReplyMarkup ReplyMarkup { get; set; }
+        public IReplyMarkup? ReplyMarkup { get; set; }
 
-        private string _parseMode;
+        private string? _parseMode;
 
         public SendMessageRequest(long chatId, string text)
         {

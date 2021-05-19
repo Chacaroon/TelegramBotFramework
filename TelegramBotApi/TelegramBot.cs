@@ -22,7 +22,7 @@ namespace TelegramBotApi
 
         public Task<HttpResponseMessage> SetWebhook(
             string webhookUri,
-            string[] allowedUpdates = default)
+            string[] allowedUpdates = null!)
         {
             return MakeRequest("setWebhook", new SetWebhookRequest(webhookUri, allowedUpdates));
         }

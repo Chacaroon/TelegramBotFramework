@@ -9,7 +9,6 @@
     using System.IO;
     using System.Linq;
     using System.Reflection;
-    using System.Threading.Tasks;
     using Newtonsoft.Json;
     using TelegramBotApi.Commands;
     using TelegramBotApi.Repositories;
@@ -77,7 +76,7 @@
                     using var stream = new StreamReader(context.Request.Body);
                     var update = JsonConvert.DeserializeObject<Update>(await stream.ReadToEndAsync());
 
-                    webhookService.Process(update);
+                    webhookService.Process(update!);
                 });
             });
 

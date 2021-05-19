@@ -2,7 +2,7 @@
 {
     using System.Text.RegularExpressions;
 
-    public static class MatchStringExtension
+    internal static class MatchStringExtension
     {
         public static bool IsMatch(this string str, string pattern)
         {

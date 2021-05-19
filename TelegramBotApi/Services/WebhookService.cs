@@ -3,7 +3,7 @@
     using TelegramBotApi.Services.Abstraction;
     using TelegramBotApi.Types;
 
-    public class WebhookService : IWebhookService
+    internal class WebhookService : IWebhookService
     {
         private readonly IMessageService _messageService;
         private readonly ICallbackQueryService _callbackQueryService;
@@ -18,10 +18,14 @@
         public void Process(Update update)
         {
             if (update.IsMessage())
-                _messageService.HandleRequest(update.Message);
+            {
+                _messageService.HandleRequest(update.Message!);
+            }
 
             if (update.IsCallbackQuery())
-                _callbackQueryService.HandleRequest(update.CallbackQuery);
+            {
+                _callbackQueryService.HandleRequest(update.CallbackQuery!);
+            }
         }
     }
 }

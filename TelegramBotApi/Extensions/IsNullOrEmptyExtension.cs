@@ -1,15 +1,10 @@
 ﻿namespace TelegramBotApi.Extensions
 {
-    public static class IsNullOrEmptyExtension
+    internal static class IsNullOrEmptyExtension
     {
         public static bool IsNullOrEmpty(this string item)
         {
-            if (item.Trim() == "")
-            {
-                return true;
-            }
-
-            return item == null;
+            return string.IsNullOrEmpty(item);
         }
 
         public static bool IsNullOrEmpty(this object item)

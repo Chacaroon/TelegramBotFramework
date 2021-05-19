@@ -6,6 +6,6 @@
     {
         string GetCommand();
         Dictionary<string, string> GetQueryParams();
-        string GetQueryParam(string param);
+        string? GetQueryParam(string param);
     }
 }

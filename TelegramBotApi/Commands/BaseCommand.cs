@@ -5,7 +5,7 @@
     using TelegramBotApi.Types;
     using TelegramBotApi.Types.Abstraction;
 
-    public abstract class BaseCommand
+    internal abstract class BaseCommand
 	{
 		private readonly ITelegramBot _telegramBot;
 

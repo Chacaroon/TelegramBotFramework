@@ -2,7 +2,7 @@
 {
     using TelegramBotApi.Models.Abstraction;
 
-    public class Request : IRequest
+    internal class Request : IRequest
     {
         public long ChatId { get; set; }
 
