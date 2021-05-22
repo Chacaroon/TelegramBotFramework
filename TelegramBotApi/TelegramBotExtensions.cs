@@ -1,52 +1,54 @@
-﻿namespace TelegramBotApi.Extensions
+﻿namespace TelegramBotApi
 {
-    using Microsoft.AspNetCore.Builder;
-    using Microsoft.AspNetCore.Http;
-    using Microsoft.EntityFrameworkCore;
-    using Microsoft.Extensions.Configuration;
-    using Microsoft.Extensions.DependencyInjection;
     using System;
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using Microsoft.AspNetCore.Builder;
+    using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Configuration;
+    using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json;
     using TelegramBotApi.Commands;
-    using TelegramBotApi.Repositories;
-    using TelegramBotApi.Repositories.Abstraction;
-    using TelegramBotApi.Repositories.Models;
     using TelegramBotApi.Services;
     using TelegramBotApi.Services.Abstraction;
     using TelegramBotApi.Types;
 
     public static class TelegramBotExtensions
     {
+        private static readonly string _webhookEndpoint = "/api/webhook";
+        private static readonly string _telegramApiBase = "https://api.telegram.org/bot";
+
         public static IServiceCollection AddTelegramBot(this IServiceCollection services)
         {
-            services.AddTransient<ITelegramBot, TelegramBot>();
+            services.AddScoped<ITelegramBot, TelegramBot>();
 
             services.AddHttpClient<ITelegramBot, TelegramBot>(configureClient =>
             {
-                configureClient.BaseAddress = new Uri(services.BuildServiceProvider().GetRequiredService<IConfiguration>()["TelegramBotSettings:ApiUri"]);
+                var botAccessToken = services.BuildServiceProvider().GetRequiredService<IConfiguration>()["TelegramBotSettings:BotAccessToken"];
+
+                configureClient.BaseAddress = new Uri($"{_telegramApiBase}{botAccessToken}/");
             });
 
-            services.AddDbContext<ApplicationContext>(options => options
-                .UseSqlServer(services.BuildServiceProvider().GetRequiredService<IConfiguration>()
-                    .GetConnectionString("TelegramBot")));
+            services.AddScoped<IWebhookService, WebhookService>();
 
-            services.AddTransient<IMessageService, MessageService>();
-            services.AddTransient<ICallbackQueryService, CallbackQueryService>();
-            services.AddTransient<IWebhookService, WebhookService>();
-
-            services.AddTransient<IUserRepository, UserRepository>();
-            services.AddTransient<IRepository<ChatState>, Repository<ChatState>>();
+            services.AddSingleton<ICommandResolver, CommandResolver>();
 
             var commands = Assembly.GetCallingAssembly().GetTypes()
-                .Where(x => x.IsClass && x.IsPublic && x.GetInterface(nameof(ICommand)) != null)
+                .Where(x => x.IsClass && x.IsPublic && x.IsSubclassOf(typeof(CommandBase)))
                 .ToArray();
 
             foreach (var command in commands)
             {
-                services.AddTransient(typeof(ICommand), command);
+                services.AddTransient(typeof(CommandBase), sp =>
+                {
+                    var commandInstance = (CommandBase)Activator.CreateInstance(command)!;
+                    typeof(CommandBase)
+                        .GetField("_telegramBot", BindingFlags.NonPublic | BindingFlags.Instance)!
+                        .SetValue(commandInstance, sp.GetRequiredService<ITelegramBot>());
+
+                    return commandInstance;
+                });
             }
 
             return services;
@@ -58,10 +60,10 @@
             var telegramBot = app.ApplicationServices.GetRequiredService<ITelegramBot>();
 
             telegramBot.SetWebhook(
-                configuration.WebhookUri,
+                $"{configuration.WebhookUri.Trim('/')}{_webhookEndpoint}",
                 configuration.AllowedUpdates);
 
-            app.Map("/api/webhook", (applicationBuilder) =>
+            app.Map(_webhookEndpoint, applicationBuilder =>
             {
                 applicationBuilder.Run(async context =>
                 {
@@ -76,7 +78,7 @@
                     using var stream = new StreamReader(context.Request.Body);
                     var update = JsonConvert.DeserializeObject<Update>(await stream.ReadToEndAsync());
 
-                    webhookService.Process(update!);
+                    await webhookService.Process(update!);
                 });
             });
 

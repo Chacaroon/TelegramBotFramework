@@ -5,7 +5,7 @@ namespace TelegramBotApi.Types
 {
 #nullable disable
     [JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
-    internal class Chat
+    public class Chat
     {
         public long Id { get; set; }
 

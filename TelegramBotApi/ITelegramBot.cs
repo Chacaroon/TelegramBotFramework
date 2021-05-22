@@ -1,15 +1,18 @@
-﻿using System.Net.Http;
-using System.Threading.Tasks;
-using TelegramBotApi.Types;
-using TelegramBotApi.Types.Abstraction;
-
-namespace TelegramBotApi
+﻿namespace TelegramBotApi
 {
+    using System.Net.Http;
+    using System.Threading.Tasks;
+    using TelegramBotApi.Repositories.Models;
+    using TelegramBotApi.Types;
+    using TelegramBotApi.Types.Abstraction;
+
     public interface ITelegramBot
     {
+        Task<ChatState> GetChatState(long chatId);
+
         Task<HttpResponseMessage> SetWebhook(
             string webhookUri,
-            string[] allowedUpdates = default);
+            string[] allowedUpdates = default!);
 
         Task<HttpResponseMessage> SendMessageAsync(
             long chatId,
@@ -18,7 +21,7 @@ namespace TelegramBotApi
             bool disableWebPagePreview = default,
             bool disableNotification = default,
             long replyToMessageId = default,
-            IReplyMarkup replyMarkup = default);
+            IReplyMarkup replyMarkup = default!);
 
         Task<HttpResponseMessage> SendMessageAsync(
             long chatId,
@@ -33,7 +36,7 @@ namespace TelegramBotApi
             string text,
             ParseMode parseMode = default,
             bool disableWebPagePreview = default,
-            IReplyMarkup replyMarkup = default);
+            IReplyMarkup replyMarkup = default!);
 
         Task<HttpResponseMessage> EditMessageAsync(
             long chatId,
@@ -44,6 +47,6 @@ namespace TelegramBotApi
 
         Task<HttpResponseMessage> AnswerCallbackQuery(
             string callbackQueryId,
-            string text = default);
+            string text = default!);
     }
 }

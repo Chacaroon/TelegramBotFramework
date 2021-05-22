@@ -1,28 +1,25 @@
 ﻿namespace TelegramBotApi.Services
 {
-    using System;
     using System.Collections.Generic;
-    using System.Linq;
-    using System.Text;
-    using System.Threading.Tasks;
     using TelegramBotApi.Commands;
     using TelegramBotApi.Extensions;
+    using TelegramBotApi.Services.Abstraction;
 
-    internal class CommandResolver
+    internal class CommandResolver : ICommandResolver
     {
-        private readonly IEnumerable<ICommand> _commands;
+        private readonly IEnumerable<CommandBase> _commands;
 
-        public CommandResolver(IEnumerable<ICommand> commands)
+        public CommandResolver(IEnumerable<CommandBase> commands)
         {
             _commands = commands;
         }
 
-        public ICommand? Resolve(string name)
+        public CommandBase? Resolve(string name)
         {
             return _commands.GetCommand(name);
         }
 
-        public ICommand ResolveOrDefault(string name)
+        public CommandBase ResolveOrDefault(string? name)
         {
             return _commands.GetCommand(name) ?? _commands.GetUndefinedCommand();
         }

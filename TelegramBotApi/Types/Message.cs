@@ -8,8 +8,9 @@
 
 #nullable disable
     [JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
-    internal class Message
+    public class Message
     {
+        private readonly Regex _commandRegex = new(@"^/(\w*)$", RegexOptions.Compiled);
 
         [JsonProperty("message_id")]
         public long Id { get; set; }
@@ -23,12 +24,7 @@
 
         public string Text { get; set; }
 
-        private readonly Regex _commandRegex = new(@"^/(\w*)$", RegexOptions.Compiled);
-
-        public bool IsCommand()
-        {
-            return _commandRegex.IsMatch(Text);
-        }
+        public bool IsCommand => _commandRegex.IsMatch(Text);
 
         public string GetCommand()
         {

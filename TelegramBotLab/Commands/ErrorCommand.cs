@@ -1,21 +1,13 @@
 ﻿namespace TelegramBotLab.Commands
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
-    using TelegramBotApi;
     using TelegramBotApi.Commands;
-    using TelegramBotApi.Models.Abstraction;
+    using TelegramBotApi.Models.Update;
     using TelegramBotApi.Types;
 
-    public class ErrorCommand : BaseCommand, ICommand
+    public class ErrorCommand : CommandBase
     {
-        public ErrorCommand(ITelegramBot telegramBot) : base(telegramBot)
-        {
-        }
-
-        public async Task Invoke(IRequest request)
+        public async Task Invoke(Request request)
         {
             await SendResponse(request.ChatId, MessageTemplate.Create().SetText("Something went wrong"));
         }

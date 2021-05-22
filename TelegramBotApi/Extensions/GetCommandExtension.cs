@@ -6,19 +6,19 @@
 
     internal static class GetCommandExtension
     {
-        public static ICommand GetCommand(this IEnumerable<ICommand> commands, string commandName)
+        public static CommandBase? GetCommand(this IEnumerable<CommandBase> commands, string commandName)
         {
             var command = commands.FirstOrDefault(c => c.GetType().Name.IsMatch($"^(?i){commandName}command$"));
 
-            return command ?? commands.GetUndefinedCommand();
+            return command;
         }
 
-        public static ICommand GetErrorCommand(this IEnumerable<ICommand> commands)
+        public static CommandBase GetErrorCommand(this IEnumerable<CommandBase> commands)
         {
             return commands.First(c => c.GetType().Name.IsMatch("ErrorCommand"));
         }
 
-        public static ICommand GetUndefinedCommand(this IEnumerable<ICommand> commands)
+        public static CommandBase GetUndefinedCommand(this IEnumerable<CommandBase> commands)
         {
             return commands.First(c => c.GetType().Name.IsMatch("UndefinedCommand"));
 

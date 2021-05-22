@@ -1,21 +1,14 @@
 ﻿namespace TelegramBotLab.Commands
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
-    using TelegramBotApi;
     using TelegramBotApi.Commands;
-    using TelegramBotApi.Models.Abstraction;
+    using TelegramBotApi.Models;
+    using TelegramBotApi.Models.Update;
     using TelegramBotApi.Types;
 
-    public class UndefinedCommand : BaseCommand, ICommand
+    public class UndefinedCommand : CommandBase
     {
-        public UndefinedCommand(ITelegramBot telegramBot) : base(telegramBot)
-        {
-        }
-
-        public async Task Invoke(IRequest request)
+        public async Task Invoke(MessageRequest request)
         {
             await SendResponse(request.ChatId, MessageTemplate.Create().SetText("Undefined command"));
         }

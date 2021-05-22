@@ -1,8 +1,10 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
-namespace TelegramBotApi.Types.ReplyMarkup
+﻿namespace TelegramBotApi.Types.ReplyMarkup
 {
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Serialization;
+
+    #nullable disable
+
     [JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
     public class CallbackQuery
     {
@@ -12,4 +14,6 @@ namespace TelegramBotApi.Types.ReplyMarkup
         public Message Message { get; set; }
         public string Data { get; set; }
     }
+
+    #nullable restore
 }

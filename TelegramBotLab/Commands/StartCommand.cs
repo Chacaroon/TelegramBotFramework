@@ -1,29 +1,14 @@
 ﻿namespace TelegramBotLab.Commands
 {
     using System.Threading.Tasks;
-    using TelegramBotApi;
     using TelegramBotApi.Commands;
-    using TelegramBotApi.Models.Abstraction;
-    using TelegramBotApi.Repositories.Abstraction;
-    using TelegramBotApi.Repositories.Models;
+    using TelegramBotApi.Models.Update;
     using TelegramBotApi.Types;
 
-    public class StartCommand : BaseCommand, ICommand
+    public class StartCommand : CommandBase
     {
-        private readonly IUserRepository _userRepository;
-
-        public StartCommand(ITelegramBot telegramBot,
-            IUserRepository userRepository)
-            : base(telegramBot)
+        public async Task Invoke(MessageRequest request)
         {
-            _userRepository = userRepository;
-        }
-
-        public async Task Invoke(IRequest request)
-        {
-            var user = new ApplicationUser(request.ChatId);
-            _userRepository.Add(user);
-
             await SendResponse(
                 request.ChatId,
                 MessageTemplate.Create()

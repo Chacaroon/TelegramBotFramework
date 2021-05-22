@@ -1,22 +1,16 @@
 ﻿namespace TelegramBotLab.Commands
 {
-    using System;
-    using System.Collections.Generic;
-    using System.Linq;
     using System.Threading.Tasks;
     using TelegramBotApi;
     using TelegramBotApi.Commands;
-    using TelegramBotApi.Models.Abstraction;
+    using TelegramBotApi.Models;
+    using TelegramBotApi.Models.Update;
     using TelegramBotApi.Types;
     using TelegramBotApi.Types.ReplyMarkup;
 
-    public class SomeCommand : BaseCommand, ICommand
+    public class SomeCommand : CommandBase
     {
-        public SomeCommand(ITelegramBot telegramBot) : base(telegramBot)
-        {
-        }
-
-        public async Task Invoke(IRequest request)
+        public async Task Invoke(MessageRequest request)
         {
             var markup = new InlineKeyboardMarkup().AddRow(
                 new InlineKeyboardButton("Button 1", callbackData: "another:someParam=42"), new InlineKeyboardButton("Button 2", callbackData: "another:someParam=43")

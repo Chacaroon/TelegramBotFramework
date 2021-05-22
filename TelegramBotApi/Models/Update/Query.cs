@@ -1,11 +1,10 @@
-﻿namespace TelegramBotApi.Models
+﻿namespace TelegramBotApi.Models.Update
 {
     using System.Collections.Generic;
     using System.Text.RegularExpressions;
     using TelegramBotApi.Extensions;
-    using TelegramBotApi.Models.Abstraction;
 
-    internal class Query : IQuery
+    public class Query
     {
         private readonly string _text;
 

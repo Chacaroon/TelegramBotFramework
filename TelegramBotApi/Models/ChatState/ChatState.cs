@@ -2,10 +2,8 @@
 {
     using TelegramBotApi.Extensions;
 
-    public class ChatState : Entity
+    public class ChatState
     {
-        public ApplicationUser User { get; set; }
-
         public bool IsWaitingFor
         {
             get => _isWaitingFor;
@@ -19,17 +17,17 @@
                 _isWaitingFor = value;
             }
         }
-        public string WaitingFor
+        public string? WaitingFor
         {
             get => _waitingFor;
             set
             {
-                IsWaitingFor = !value.IsNullOrEmpty();
+                IsWaitingFor = !value!.IsNullOrEmpty();
                 _waitingFor = value;
             }
         }
 
         private bool _isWaitingFor;
-        private string _waitingFor;
+        private string? _waitingFor;
     }
 }

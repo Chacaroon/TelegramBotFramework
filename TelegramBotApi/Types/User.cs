@@ -6,7 +6,7 @@
     #nullable disable
 
     [JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
-    internal class User
+    public class User
     {
         public long Id { get; set; }
 

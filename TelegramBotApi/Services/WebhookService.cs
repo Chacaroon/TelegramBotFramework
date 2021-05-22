@@ -1,31 +1,34 @@
 ﻿namespace TelegramBotApi.Services
 {
+    using System.Threading.Tasks;
+    using TelegramBotApi.Models.Update;
     using TelegramBotApi.Services.Abstraction;
     using TelegramBotApi.Types;
 
     internal class WebhookService : IWebhookService
     {
-        private readonly IMessageService _messageService;
-        private readonly ICallbackQueryService _callbackQueryService;
+        private readonly ICommandResolver _commandResolver;
+        private readonly ITelegramBot _telegramBot;
 
-        public WebhookService(IMessageService messageService,
-            ICallbackQueryService callbackQueryService)
+        public WebhookService(ICommandResolver commandResolver,
+            ITelegramBot telegramBot)
         {
-            _messageService = messageService;
-            _callbackQueryService = callbackQueryService;
+            _commandResolver = commandResolver;
+            _telegramBot = telegramBot;
         }
 
-        public void Process(Update update)
+        public async Task Process(Update update)
         {
-            if (update.IsMessage())
+            var command = update switch
             {
-                _messageService.HandleRequest(update.Message!);
-            }
+                { IsCallbackQuery: true } => _commandResolver.ResolveOrDefault(QueryRequest.FromUpdate(update).Query.GetCommand()),
+                { IsMessage: true, Message: { IsCommand: true } } => _commandResolver.ResolveOrDefault(update.Message.GetCommand()),
+                { IsMessage: true, Message: { IsCommand: false } } => _commandResolver.ResolveOrDefault(
+                    (await _telegramBot.GetChatState(update.Message.Chat.Id)).WaitingFor),
+                _ => _commandResolver.ResolveOrDefault(null)
+            };
 
-            if (update.IsCallbackQuery())
-            {
-                _callbackQueryService.HandleRequest(update.CallbackQuery!);
-            }
+            await command.Invoke(update);
         }
     }
 }

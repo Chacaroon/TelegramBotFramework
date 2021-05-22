@@ -1,9 +1,10 @@
 ﻿namespace TelegramBotApi.Services.Abstraction
 {
+    using System.Threading.Tasks;
     using TelegramBotApi.Types;
 
     public interface IWebhookService
     {
-        void Process(Update update);
+        Task Process(Update update);
     }
 }

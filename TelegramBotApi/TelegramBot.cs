@@ -6,6 +6,8 @@ using TelegramBotApi.Types.Requests;
 
 namespace TelegramBotApi
 {
+    using TelegramBotApi.Repositories.Models;
+
     internal class TelegramBot : ITelegramBot
     {
         private readonly HttpClient _client;
@@ -18,6 +20,14 @@ namespace TelegramBotApi
         private Task<HttpResponseMessage> MakeRequest(string url, BaseRequest obj)
         {
             return _client.PostAsync(url, obj.ToHttpContent());
+        }
+
+        public Task<ChatState> GetChatState(long chatId)
+        {
+            return Task.FromResult(new ChatState()
+            {
+                WaitingFor = "start1"
+            });
         }
 
         public Task<HttpResponseMessage> SetWebhook(
