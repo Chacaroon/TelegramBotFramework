@@ -3,7 +3,7 @@
     using Newtonsoft.Json;
     using Newtonsoft.Json.Serialization;
 
-    #nullable disable
+#nullable disable
 
     [JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
     public class User
@@ -15,6 +15,6 @@
         public string Username { get; set; }
     }
 
-    #nullable restore
+#nullable restore
 
 }

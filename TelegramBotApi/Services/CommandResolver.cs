@@ -19,11 +19,11 @@
             _commandsDictionary = commandsDictionary;
         }
 
-        public CommandBase ResolveOrDefault(string? name)
+        public CommandBase? Resolve(string? name)
         {
-            return _commandsDictionary.TryGetValue(name?.ToLower() ?? InternalConstants.UndefinedCommandName, out var commandType)
+            return _commandsDictionary.TryGetValue(name?.ToLower() ?? string.Empty, out var commandType)
                 ? (CommandBase)_services.GetRequiredService(commandType)
-                : (CommandBase)_services.GetRequiredService(_commandsDictionary[InternalConstants.UndefinedCommandName]);
+                : null;
         }
     }
 }

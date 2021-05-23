@@ -7,6 +7,7 @@
     using System.Text.RegularExpressions;
 
 #nullable disable
+
     [JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
     public class Message
     {

@@ -18,8 +18,8 @@
 
     public static class TelegramBotExtensions
     {
-        private static readonly string _webhookEndpoint = "/api/webhook";
-        private static readonly string _telegramApiBase = "https://api.telegram.org/bot";
+        private const string WebhookEndpointBase = "/api/webhook";
+        private const string TelegramApiBase = "https://api.telegram.org/bot";
 
         public static IServiceCollection AddTelegramBot(this IServiceCollection services)
         {
@@ -29,7 +29,7 @@
             {
                 var botAccessToken = services.BuildServiceProvider().GetRequiredService<IConfiguration>()["TelegramBotSettings:BotAccessToken"];
 
-                configureClient.BaseAddress = new Uri($"{_telegramApiBase}{botAccessToken}/");
+                configureClient.BaseAddress = new Uri($"{TelegramApiBase}{botAccessToken}/");
             });
 
             services.AddScoped<IWebhookService, WebhookService>();
@@ -55,7 +55,7 @@
                 {
                     var commandInstance = Activator.CreateInstance(commandType)!;
                     typeof(CommandBase)
-                        .GetProperty("TelegramBot")!
+                        .GetProperty("TelegramBot", BindingFlags.Instance | BindingFlags.NonPublic)!
                         .SetValue(commandInstance, sp.GetRequiredService<ITelegramBot>());
 
                     return commandInstance;
@@ -67,14 +67,18 @@
 
         public static IApplicationBuilder UseTelegramBot(this IApplicationBuilder app)
         {
-            var configuration = app.ApplicationServices.GetRequiredService<IConfiguration>().GetSection(nameof(TelegramBotSettings)).Get<TelegramBotSettings>();
             var telegramBot = app.ApplicationServices.GetRequiredService<ITelegramBot>();
+            var telegramBotSettings = app.ApplicationServices.GetRequiredService<IConfiguration>()
+                .GetSection(nameof(TelegramBotSettings))
+                .Get<TelegramBotSettings>();
+
+            var webhookEndpoint = $"{WebhookEndpointBase}/{telegramBotSettings.BotAccessToken}";
 
             telegramBot.SetWebhook(
-                $"{configuration.WebhookUri.Trim('/')}{_webhookEndpoint}",
-                configuration.AllowedUpdates);
+                $"{telegramBotSettings.WebhookUri.Trim('/')}{webhookEndpoint}",
+                telegramBotSettings.AllowedUpdates);
 
-            app.Map(_webhookEndpoint, applicationBuilder =>
+            app.Map(webhookEndpoint, applicationBuilder =>
             {
                 applicationBuilder.Run(async context =>
                 {
@@ -83,7 +87,7 @@
                         context.Response.StatusCode = StatusCodes.Status405MethodNotAllowed;
                         return;
                     }
-                    
+
                     var webhookService = context.RequestServices.GetRequiredService<IWebhookService>();
 
                     using var stream = new StreamReader(context.Request.Body);

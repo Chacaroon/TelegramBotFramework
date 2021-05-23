@@ -1,6 +1,6 @@
 ﻿namespace TelegramBotApi.Types
 {
-    #nullable disable
+#nullable disable
 
     internal class TelegramBotSettings
     {
@@ -11,5 +11,5 @@
         public string[] AllowedUpdates { get; set; }
     }
 
-    #nullable restore
+#nullable restore
 }

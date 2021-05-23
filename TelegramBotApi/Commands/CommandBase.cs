@@ -13,7 +13,7 @@
     public abstract class CommandBase
     {
         // The value will be set when resolving a specific command
-        public ITelegramBot TelegramBot { get; private set; } = null!;
+        protected ITelegramBot TelegramBot { get; private set; } = null!;
 
         private readonly IMapper _mapper;
 

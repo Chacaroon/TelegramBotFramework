@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using System.Collections.Generic;
-using TelegramBotApi.Types.Abstraction;
-
-namespace TelegramBotApi.Types.ReplyMarkup
+﻿namespace TelegramBotApi.Types.ReplyMarkup
 {
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Serialization;
+    using System.Collections.Generic;
+    using TelegramBotApi.Types.Abstraction;
+
     [JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
     public class InlineKeyboardMarkup : IReplyMarkup
     {

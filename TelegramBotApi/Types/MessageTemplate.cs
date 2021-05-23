@@ -2,14 +2,14 @@
 {
     using TelegramBotApi.Types.Abstraction;
 
-    #nullable disable
+#nullable disable
 
     public class MessageTemplate
     {
         public string Text { get; set; }
 
         public ParseMode ParseMode { get; set; }
-        
+
         public IReplyMarkup ReplyMarkup { get; set; }
 
         public static MessageTemplate Create() => new();
@@ -33,6 +33,6 @@
         }
     }
 
-    #nullable restore
+#nullable restore
 
 }
