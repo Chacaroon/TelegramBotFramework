@@ -6,7 +6,6 @@ namespace TelegramBotLab
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
     using TelegramBotApi;
-    using TelegramBotApi.Extensions;
 
     public class Startup
     {

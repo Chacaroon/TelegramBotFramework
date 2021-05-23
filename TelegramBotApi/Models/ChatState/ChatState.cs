@@ -1,7 +1,5 @@
-﻿namespace TelegramBotApi.Repositories.Models
+﻿namespace TelegramBotApi.Models.ChatState
 {
-    using TelegramBotApi.Extensions;
-
     public class ChatState
     {
         public bool IsWaitingFor
@@ -22,7 +20,7 @@
             get => _waitingFor;
             set
             {
-                IsWaitingFor = !value!.IsNullOrEmpty();
+                IsWaitingFor = value != null;
                 _waitingFor = value;
             }
         }

@@ -1,14 +1,20 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-using TelegramBotApi.Types.Abstraction;
-
-namespace TelegramBotApi.Types.Requests
+﻿namespace TelegramBotApi.Types.Requests
 {
+    using Newtonsoft.Json;
+    using TelegramBotApi.Types.Abstraction;
+
     internal class SendMessageRequest : BaseRequest
     {
+        public SendMessageRequest(long chatId, string text)
+        {
+            ChatId = chatId;
+            Text = text;
+        }
+
         public long ChatId { get; set; }
 
         public string Text { get; set; }
+        
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public string? ParseMode
         {
@@ -18,21 +24,20 @@ namespace TelegramBotApi.Types.Requests
                 ? null
                 : value;
         }
+        
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool DisableWebPagePreview { get; set; }
+        
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool DisableNotification { get; set; }
+        
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long ReplyToMessageId { get; set; }
+        
         [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReplyMarkup? ReplyMarkup { get; set; }
 
-        private string? _parseMode;
 
-        public SendMessageRequest(long chatId, string text)
-        {
-            ChatId = chatId;
-            Text = text;
-        }
+        private string? _parseMode;
     }
 }

@@ -1,43 +1,29 @@
 ﻿namespace TelegramBotApi.Models.Update
 {
     using System.Collections.Generic;
+    using System.Linq;
     using System.Text.RegularExpressions;
-    using TelegramBotApi.Extensions;
 
     public class Query
     {
         private readonly string _text;
+
+        private readonly Regex _commandParametersRegex = new(@"[A-z]+:?(?:([A-z\d]+)=([^,]+),?)*", RegexOptions.IgnoreCase);
 
         public Query(string text)
         {
             _text = text;
         }
 
-        public string GetCommand()
-        {
-            if (_text.IsNullOrEmpty())
-            {
-                return "";
-            }
-
-            Match match = new Regex(@"^(?i)([a-z]+):?").Match(_text);
-
-            return match.Groups[1].Value;
-        }
-
         public Dictionary<string, string> GetQueryParams()
         {
-            var @params = new Dictionary<string, string>();
+            var match = _commandParametersRegex.Match(_text);
 
-            var match = new Regex(@"(?i)[a-z]+:?(?:([a-z]+)=([^,]+),?)*").Match(_text);
-
-            for (var i = 0; i < match.Groups[1].Captures.Count; i++)
-            {
-                @params.Add(match.Groups[1].Captures[i].Value,
-                    match.Groups[2].Captures[i].Value);
-            }
-
-            return @params;
+            return match.Groups[1].Captures
+                .Select(x => x.Value)
+                .Zip(match.Groups[2].Captures
+                    .Select(x => x.Value))
+                .ToDictionary(x => x.First, x => x.Second);
         }
 
         public string? GetQueryParam(string param)

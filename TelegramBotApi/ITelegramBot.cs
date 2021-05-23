@@ -2,7 +2,7 @@
 {
     using System.Net.Http;
     using System.Threading.Tasks;
-    using TelegramBotApi.Repositories.Models;
+    using TelegramBotApi.Models.ChatState;
     using TelegramBotApi.Types;
     using TelegramBotApi.Types.Abstraction;
 

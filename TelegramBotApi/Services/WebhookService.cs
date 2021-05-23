@@ -1,7 +1,7 @@
 ﻿namespace TelegramBotApi.Services
 {
     using System.Threading.Tasks;
-    using TelegramBotApi.Models.Update;
+    using TelegramBotApi.Constants;
     using TelegramBotApi.Services.Abstraction;
     using TelegramBotApi.Types;
 
@@ -21,11 +21,11 @@
         {
             var command = update switch
             {
-                { IsCallbackQuery: true } => _commandResolver.ResolveOrDefault(QueryRequest.FromUpdate(update).Query.GetCommand()),
+                { IsCallbackQuery: true } => _commandResolver.ResolveOrDefault(update.CallbackQuery!.GetCommand()),
                 { IsMessage: true, Message: { IsCommand: true } } => _commandResolver.ResolveOrDefault(update.Message.GetCommand()),
                 { IsMessage: true, Message: { IsCommand: false } } => _commandResolver.ResolveOrDefault(
                     (await _telegramBot.GetChatState(update.Message.Chat.Id)).WaitingFor),
-                _ => _commandResolver.ResolveOrDefault(null)
+                _ => _commandResolver.ResolveOrDefault(InternalConstants.UndefinedCommandName)
             };
 
             await command.Invoke(update);

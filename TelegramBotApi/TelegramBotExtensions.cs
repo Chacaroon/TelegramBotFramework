@@ -4,12 +4,14 @@
     using System.IO;
     using System.Linq;
     using System.Reflection;
+    using System.Text.RegularExpressions;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json;
     using TelegramBotApi.Commands;
+    using TelegramBotApi.Constants;
     using TelegramBotApi.Services;
     using TelegramBotApi.Services.Abstraction;
     using TelegramBotApi.Types;
@@ -32,19 +34,28 @@
 
             services.AddScoped<IWebhookService, WebhookService>();
 
-            services.AddSingleton<ICommandResolver, CommandResolver>();
 
-            var commands = Assembly.GetCallingAssembly().GetTypes()
-                .Where(x => x.IsClass && x.IsPublic && x.IsSubclassOf(typeof(CommandBase)))
+            var commandTypes = Assembly.GetCallingAssembly().GetTypes()
+                .Where(x => x.IsClass
+                            && x.IsPublic
+                            && x.IsSubclassOf(typeof(CommandBase)))
                 .ToArray();
 
-            foreach (var command in commands)
+            var commandsDictionary = commandTypes.ToDictionary(
+                x => Regex
+                    .Replace(x.Name, $"{InternalConstants.CommandSuffix}$", string.Empty, RegexOptions.IgnoreCase)
+                    .ToLower());
+
+            services.AddTransient<ICommandResolver, CommandResolver>(sp =>
+                new CommandResolver(sp.GetRequiredService<IServiceProvider>(), commandsDictionary));
+
+            foreach (var commandType in commandTypes)
             {
-                services.AddTransient(typeof(CommandBase), sp =>
+                services.AddTransient(commandType, sp =>
                 {
-                    var commandInstance = (CommandBase)Activator.CreateInstance(command)!;
+                    var commandInstance = Activator.CreateInstance(commandType)!;
                     typeof(CommandBase)
-                        .GetField("_telegramBot", BindingFlags.NonPublic | BindingFlags.Instance)!
+                        .GetProperty("TelegramBot")!
                         .SetValue(commandInstance, sp.GetRequiredService<ITelegramBot>());
 
                     return commandInstance;
@@ -72,7 +83,7 @@
                         context.Response.StatusCode = StatusCodes.Status405MethodNotAllowed;
                         return;
                     }
-
+                    
                     var webhookService = context.RequestServices.GetRequiredService<IWebhookService>();
 
                     using var stream = new StreamReader(context.Request.Body);

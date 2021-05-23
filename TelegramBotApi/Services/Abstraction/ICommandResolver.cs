@@ -4,7 +4,6 @@
 
     internal interface ICommandResolver
     {
-        CommandBase? Resolve(string name);
         CommandBase ResolveOrDefault(string? name);
     }
 }

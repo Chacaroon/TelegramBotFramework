@@ -1,12 +1,11 @@
-﻿using System.Net.Http;
-using System.Threading.Tasks;
-using TelegramBotApi.Types;
-using TelegramBotApi.Types.Abstraction;
-using TelegramBotApi.Types.Requests;
-
-namespace TelegramBotApi
+﻿namespace TelegramBotApi
 {
-    using TelegramBotApi.Repositories.Models;
+    using System.Net.Http;
+    using System.Threading.Tasks;
+    using TelegramBotApi.Types;
+    using TelegramBotApi.Types.Abstraction;
+    using TelegramBotApi.Types.Requests;
+    using TelegramBotApi.Models.ChatState;
 
     internal class TelegramBot : ITelegramBot
     {

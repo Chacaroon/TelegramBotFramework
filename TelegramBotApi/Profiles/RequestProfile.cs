@@ -1,7 +1,6 @@
 ﻿namespace TelegramBotApi.Profiles
 {
     using AutoMapper;
-    using TelegramBotApi.Models;
     using TelegramBotApi.Models.Update;
     using TelegramBotApi.Types;
 

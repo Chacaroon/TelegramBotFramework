@@ -1,27 +1,29 @@
 ﻿namespace TelegramBotApi.Services
 {
+    using System;
     using System.Collections.Generic;
+    using Microsoft.Extensions.DependencyInjection;
     using TelegramBotApi.Commands;
-    using TelegramBotApi.Extensions;
+    using TelegramBotApi.Constants;
     using TelegramBotApi.Services.Abstraction;
 
     internal class CommandResolver : ICommandResolver
     {
-        private readonly IEnumerable<CommandBase> _commands;
+        private readonly IServiceProvider _services;
+        private readonly IReadOnlyDictionary<string, Type> _commandsDictionary;
 
-        public CommandResolver(IEnumerable<CommandBase> commands)
+        public CommandResolver(IServiceProvider services, 
+            IReadOnlyDictionary<string, Type> commandsDictionary)
         {
-            _commands = commands;
-        }
-
-        public CommandBase? Resolve(string name)
-        {
-            return _commands.GetCommand(name);
+            _services = services;
+            _commandsDictionary = commandsDictionary;
         }
 
         public CommandBase ResolveOrDefault(string? name)
         {
-            return _commands.GetCommand(name) ?? _commands.GetUndefinedCommand();
+            return _commandsDictionary.TryGetValue(name?.ToLower() ?? InternalConstants.UndefinedCommandName, out var commandType)
+                ? (CommandBase)_services.GetRequiredService(commandType)
+                : (CommandBase)_services.GetRequiredService(_commandsDictionary[InternalConstants.UndefinedCommandName]);
         }
     }
 }

@@ -1,9 +1,10 @@
-﻿using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
-
-namespace TelegramBotApi.Types
+﻿namespace TelegramBotApi.Types
 {
+    using Newtonsoft.Json;
+    using Newtonsoft.Json.Serialization;
+
 #nullable disable
+
     [JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
     public class Chat
     {
@@ -13,5 +14,6 @@ namespace TelegramBotApi.Types
         public string FirstName { get; set; }
         public string LastName { get; set; }
     }
+
 #nullable restore
 }

@@ -12,10 +12,10 @@
 
     public abstract class CommandBase
     {
-        public ITelegramBot TelegramBot => _telegramBot;
+        // The value will be set when resolving a specific command
+        public ITelegramBot TelegramBot { get; private set; } = null!;
 
         private readonly IMapper _mapper;
-        private ITelegramBot _telegramBot = null!;
 
         protected CommandBase()
         {
@@ -94,7 +94,8 @@
             return update switch
             {
                 { IsMessage: true } => typeof(MessageRequest),
-                { IsCallbackQuery: true } => typeof(QueryRequest)
+                { IsCallbackQuery: true } => typeof(QueryRequest),
+                _ => throw new ArgumentOutOfRangeException(nameof(update), update, null)
             };
         }
     }
