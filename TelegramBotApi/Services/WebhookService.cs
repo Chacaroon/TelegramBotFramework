@@ -1,10 +1,8 @@
 ﻿namespace TelegramBotApi.Services
 {
     using System;
-    using System.Text.Json;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
-    using TelegramBotApi.Constants;
     using TelegramBotApi.Services.Abstraction;
     using TelegramBotApi.Types;
 
@@ -13,6 +11,9 @@
         private readonly ICommandResolver _commandResolver;
         private readonly ITelegramBot _telegramBot;
         private readonly ILogger<WebhookService> _logger;
+
+        private const string UndefinedCommandName = "undefined";
+        private const string ErrorCommandName = "error";
 
         public WebhookService(ICommandResolver commandResolver,
             ITelegramBot telegramBot,
@@ -50,9 +51,9 @@
                 _logger.LogWarning(
                     "Command with name {commandName} was not found. {undefinedCommand} command will be invoked",
                     commandName,
-                    InternalConstants.UndefinedCommandName);
+                    UndefinedCommandName);
 
-                command = _commandResolver.Resolve(InternalConstants.UndefinedCommandName)!;
+                command = _commandResolver.Resolve(UndefinedCommandName)!;
             }
 
             try
@@ -65,7 +66,7 @@
             {
                 _logger.LogError(e, "An error was occurred during invoke {commandName} command", commandName);
 
-                await _commandResolver.Resolve(InternalConstants.ErrorCommandName)!.Invoke(update);
+                await _commandResolver.Resolve(ErrorCommandName)!.Invoke(update);
             }
         }
     }

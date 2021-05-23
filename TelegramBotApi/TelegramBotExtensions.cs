@@ -7,11 +7,11 @@
     using System.Text.RegularExpressions;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
+    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json;
     using TelegramBotApi.Commands;
-    using TelegramBotApi.Constants;
     using TelegramBotApi.Services;
     using TelegramBotApi.Services.Abstraction;
     using TelegramBotApi.Types;
@@ -20,8 +20,31 @@
     {
         private const string WebhookEndpointBase = "/api/webhook";
         private const string TelegramApiBase = "https://api.telegram.org/bot";
+        private const string CommandSuffix = "Command";
 
         public static IServiceCollection AddTelegramBot(this IServiceCollection services)
+        {
+            RegisterServices(services);
+            RegisterCommands(services);
+            
+
+
+            return services;
+        }
+
+        public static IApplicationBuilder UseTelegramBot(this IApplicationBuilder app)
+        {
+            var telegramBotSettings = app.ApplicationServices.GetRequiredService<IConfiguration>()
+                .GetSection(nameof(TelegramBotSettings))
+                .Get<TelegramBotSettings>();
+
+            AddMiddleware(app, GetWebhookEndpoint(telegramBotSettings));
+            SetWebhookPath(app, telegramBotSettings);
+
+            return app;
+        }
+
+        private static void RegisterServices(IServiceCollection services)
         {
             services.AddScoped<ITelegramBot, TelegramBot>();
 
@@ -33,8 +56,10 @@
             });
 
             services.AddScoped<IWebhookService, WebhookService>();
+        }
 
-
+        private static void RegisterCommands(IServiceCollection services)
+        {
             var commandTypes = Assembly.GetCallingAssembly().GetTypes()
                 .Where(x => x.IsClass
                             && x.IsPublic
@@ -43,7 +68,7 @@
 
             var commandsDictionary = commandTypes.ToDictionary(
                 x => Regex
-                    .Replace(x.Name, $"{InternalConstants.CommandSuffix}$", string.Empty, RegexOptions.IgnoreCase)
+                    .Replace(x.Name, $"{CommandSuffix}$", string.Empty, RegexOptions.IgnoreCase)
                     .ToLower());
 
             services.AddTransient<ICommandResolver, CommandResolver>(sp =>
@@ -61,23 +86,10 @@
                     return commandInstance;
                 });
             }
-
-            return services;
         }
 
-        public static IApplicationBuilder UseTelegramBot(this IApplicationBuilder app)
+        private static void AddMiddleware(IApplicationBuilder app, string webhookEndpoint)
         {
-            var telegramBot = app.ApplicationServices.GetRequiredService<ITelegramBot>();
-            var telegramBotSettings = app.ApplicationServices.GetRequiredService<IConfiguration>()
-                .GetSection(nameof(TelegramBotSettings))
-                .Get<TelegramBotSettings>();
-
-            var webhookEndpoint = $"{WebhookEndpointBase}/{telegramBotSettings.BotAccessToken}";
-
-            telegramBot.SetWebhook(
-                $"{telegramBotSettings.WebhookUri.Trim('/')}{webhookEndpoint}",
-                telegramBotSettings.AllowedUpdates);
-
             app.Map(webhookEndpoint, applicationBuilder =>
             {
                 applicationBuilder.Run(async context =>
@@ -96,8 +108,18 @@
                     await webhookService.Process(update!);
                 });
             });
-
-            return app;
         }
+
+        private static void SetWebhookPath(IApplicationBuilder app, TelegramBotSettings telegramBotSettings)
+        {
+            var telegramBot = app.ApplicationServices.GetRequiredService<ITelegramBot>();
+            var webhookUri = $"{telegramBotSettings.WebhookUri.Trim('/')}{GetWebhookEndpoint(telegramBotSettings)}";
+
+            telegramBot.SetWebhook(webhookUri, telegramBotSettings.AllowedUpdates);
+
+        }
+
+        private static string GetWebhookEndpoint(TelegramBotSettings telegramBotSettings) =>
+            $"{WebhookEndpointBase}/{telegramBotSettings.BotAccessToken}";
     }
 }
