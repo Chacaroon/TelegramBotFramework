@@ -1,4 +1,4 @@
-﻿namespace TelegramBotApi
+﻿namespace TelegramBotApi.IoC
 {
     using System;
     using System.IO;
@@ -7,7 +7,6 @@
     using System.Text.RegularExpressions;
     using Microsoft.AspNetCore.Builder;
     using Microsoft.AspNetCore.Http;
-    using Microsoft.Extensions.Caching.Memory;
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Newtonsoft.Json;
@@ -22,14 +21,12 @@
         private const string TelegramApiBase = "https://api.telegram.org/bot";
         private const string CommandSuffix = "Command";
 
-        public static IServiceCollection AddTelegramBot(this IServiceCollection services)
+        public static TelegramBotServiceCollectionBuilder AddTelegramBot(this IServiceCollection services)
         {
             RegisterServices(services);
-            RegisterCommands(services);
-            
+            RegisterCommands(services, Assembly.GetCallingAssembly().GetTypes());
 
-
-            return services;
+            return new TelegramBotServiceCollectionBuilder(services);
         }
 
         public static IApplicationBuilder UseTelegramBot(this IApplicationBuilder app)
@@ -56,11 +53,13 @@
             });
 
             services.AddScoped<IWebhookService, WebhookService>();
+
+            services.AddHttpContextAccessor();
         }
 
-        private static void RegisterCommands(IServiceCollection services)
+        private static void RegisterCommands(IServiceCollection services, Type[] types)
         {
-            var commandTypes = Assembly.GetCallingAssembly().GetTypes()
+            var commandTypes = types
                 .Where(x => x.IsClass
                             && x.IsPublic
                             && x.IsSubclassOf(typeof(CommandBase)))
@@ -76,15 +75,7 @@
 
             foreach (var commandType in commandTypes)
             {
-                services.AddTransient(commandType, sp =>
-                {
-                    var commandInstance = Activator.CreateInstance(commandType)!;
-                    typeof(CommandBase)
-                        .GetProperty("TelegramBot", BindingFlags.Instance | BindingFlags.NonPublic)!
-                        .SetValue(commandInstance, sp.GetRequiredService<ITelegramBot>());
-
-                    return commandInstance;
-                });
+                services.AddTransient(commandType, commandType);
             }
         }
 
@@ -115,11 +106,13 @@
             var telegramBot = app.ApplicationServices.GetRequiredService<ITelegramBot>();
             var webhookUri = $"{telegramBotSettings.WebhookUri.Trim('/')}{GetWebhookEndpoint(telegramBotSettings)}";
 
-            telegramBot.SetWebhook(webhookUri, telegramBotSettings.AllowedUpdates);
+            telegramBot.SetWebhookAsync(webhookUri, telegramBotSettings.AllowedUpdates);
 
         }
 
-        private static string GetWebhookEndpoint(TelegramBotSettings telegramBotSettings) =>
-            $"{WebhookEndpointBase}/{telegramBotSettings.BotAccessToken}";
+        private static string GetWebhookEndpoint(TelegramBotSettings telegramBotSettings)
+        {
+            return $"{WebhookEndpointBase}/{telegramBotSettings.BotAccessToken}";
+        }
     }
 }

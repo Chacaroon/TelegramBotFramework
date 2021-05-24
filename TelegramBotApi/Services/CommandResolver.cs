@@ -11,7 +11,7 @@
         private readonly IServiceProvider _services;
         private readonly IReadOnlyDictionary<string, Type> _commandsDictionary;
 
-        public CommandResolver(IServiceProvider services, 
+        public CommandResolver(IServiceProvider services,
             IReadOnlyDictionary<string, Type> commandsDictionary)
         {
             _services = services;
@@ -20,9 +20,16 @@
 
         public CommandBase? Resolve(string? name)
         {
-            return _commandsDictionary.TryGetValue(name?.ToLower() ?? string.Empty, out var commandType)
-                ? (CommandBase)_services.GetRequiredService(commandType)
-                : null;
+            if (!_commandsDictionary.TryGetValue(name?.ToLower() ?? string.Empty, out var commandType))
+            {
+                return null;
+            }
+
+            var command = (CommandBase)_services.GetRequiredService(commandType);
+
+            command.TelegramBot = _services.GetRequiredService<ITelegramBot>();
+
+            return command;
         }
     }
 }

@@ -21,7 +21,7 @@
                 .SetText("Some response")
                 .SetMarkup(markup);
 
-            await SendResponse(request.ChatId, message);
+            await SendResponseAsync(message);
         }
     }
 }

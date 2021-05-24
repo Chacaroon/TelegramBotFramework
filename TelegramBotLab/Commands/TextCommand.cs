@@ -10,7 +10,7 @@
     {
         public async Task Invoke(MessageRequest request)
         {
-            await SendResponse(request.ChatId, MessageTemplate.Create().SetText("Your name is " + request.Text));
+            await SendResponseAsync(MessageTemplate.Create().SetText("Your name is " + request.Text));
         }
     }
 }

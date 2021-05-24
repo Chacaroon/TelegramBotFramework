@@ -10,7 +10,7 @@
     {
         public async Task Invoke(MessageRequest request)
         {
-            await SendResponse(request.ChatId, MessageTemplate.Create().SetText("Undefined command"));
+            await SendResponseAsync(MessageTemplate.Create().SetText("Undefined command"));
         }
     }
 }

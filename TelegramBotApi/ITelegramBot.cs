@@ -3,19 +3,21 @@
     using System.Net.Http;
     using System.Threading.Tasks;
     using TelegramBotApi.Models.ChatState;
+using TelegramBotApi.Models.Update;
     using TelegramBotApi.Types;
     using TelegramBotApi.Types.Abstraction;
 
     public interface ITelegramBot
     {
-        Task<ChatState> GetChatState(long chatId);
+        Task<ChatState> GetChatStateAsync();
 
-        Task<HttpResponseMessage> SetWebhook(
+        Task SetChatStateAsync(ChatState chatState);
+
+        Task<HttpResponseMessage> SetWebhookAsync(
             string webhookUri,
             string[] allowedUpdates = default!);
 
         Task<HttpResponseMessage> SendMessageAsync(
-            long chatId,
             string text,
             ParseMode parseMode = default,
             bool disableWebPagePreview = default,
@@ -24,14 +26,12 @@
             IReplyMarkup replyMarkup = default!);
 
         Task<HttpResponseMessage> SendMessageAsync(
-            long chatId,
             MessageTemplate messageTemplate,
             bool disableWebPagePreview = default,
             bool disableNotification = default,
             long replyToMessageId = default);
 
         Task<HttpResponseMessage> EditMessageAsync(
-            long chatId,
             long messageId,
             string text,
             ParseMode parseMode = default,
@@ -39,14 +39,14 @@
             IReplyMarkup replyMarkup = default!);
 
         Task<HttpResponseMessage> EditMessageAsync(
-            long chatId,
             long messageId,
             MessageTemplate messageTemplate,
             bool disableWebPagePreview = default);
-
-
-        Task<HttpResponseMessage> AnswerCallbackQuery(
+        
+        Task<HttpResponseMessage> AnswerCallbackQueryAsync(
             string callbackQueryId,
             string text = default!);
+
+        internal void EnhanceWithRequest(Request request);
     }
 }

@@ -1,43 +1,70 @@
 ﻿namespace TelegramBotApi
 {
     using System.Net.Http;
+    using System.Text;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Caching.Distributed;
+    using TelegramBotApi.Models.ChatState;
+    using TelegramBotApi.Models.Update;
     using TelegramBotApi.Types;
     using TelegramBotApi.Types.Abstraction;
     using TelegramBotApi.Types.Requests;
-    using TelegramBotApi.Models.ChatState;
 
     internal class TelegramBot : ITelegramBot
     {
         private readonly HttpClient _client;
+        private readonly IDistributedCache _cache;
+        private Request _request = null!;
 
-        public TelegramBot(HttpClient client)
+        private const string CacheKeyPrefix = "tgbot";
+
+        private long ChatId => _request.ChatId;
+        private string CacheKey => GetCacheKey(_request.ChatId);
+
+        public TelegramBot(HttpClient client,
+            IDistributedCache cache)
         {
             _client = client;
+            _cache = cache;
         }
 
-        private Task<HttpResponseMessage> MakeRequest(string url, BaseRequest obj)
+        public async Task SetChatStateAsync(ChatState chatState)
         {
-            return _client.PostAsync(url, obj.ToHttpContent());
-        }
-
-        public Task<ChatState> GetChatState(long chatId)
-        {
-            return Task.FromResult(new ChatState()
+            if (!chatState.IsWaitingFor)
             {
-                WaitingFor = "start1"
-            });
+                await _cache.RemoveAsync(CacheKey);
+                return;
+            }
+
+            await _cache.SetAsync(CacheKey, Encoding.ASCII.GetBytes(chatState.WaitingFor!));
         }
 
-        public Task<HttpResponseMessage> SetWebhook(
+        public async Task<ChatState> GetChatStateAsync()
+        {
+            var chatStateBytes = await _cache.GetAsync(CacheKey);
+
+            if (chatStateBytes == null)
+            {
+                return new ChatState();
+            } 
+
+            var chatStateString = Encoding.ASCII.GetString(chatStateBytes);
+            var chatState = new ChatState
+            {
+                WaitingFor = chatStateString
+            };
+
+            return chatState;
+        }
+
+        public Task<HttpResponseMessage> SetWebhookAsync(
             string webhookUri,
             string[] allowedUpdates = null!)
         {
-            return MakeRequest("setWebhook", new SetWebhookRequest(webhookUri, allowedUpdates));
+            return MakeRequestAsync("setWebhook", new SetWebhookRequest(webhookUri, allowedUpdates));
         }
 
         public Task<HttpResponseMessage> SendMessageAsync(
-            long chatId,
             string text,
             ParseMode parseMode,
             bool disableWebPagePreview,
@@ -45,8 +72,8 @@
             long replyToMessageId,
             IReplyMarkup replyMarkup)
         {
-            return MakeRequest("sendMessage",
-                           new SendMessageRequest(chatId, text)
+            return MakeRequestAsync("sendMessage",
+                           new SendMessageRequest(ChatId, text)
                            {
                                ParseMode = parseMode.ToString(),
                                DisableWebPagePreview = disableWebPagePreview,
@@ -57,14 +84,13 @@
         }
 
         public Task<HttpResponseMessage> SendMessageAsync(
-            long chatId,
             MessageTemplate messageTemplate,
             bool disableWebPagePreview,
             bool disableNotification,
             long replyToMessageId)
         {
-            return MakeRequest("sendMessage",
-                           new SendMessageRequest(chatId, messageTemplate.Text)
+            return MakeRequestAsync("sendMessage",
+                           new SendMessageRequest(ChatId, messageTemplate.Text)
                            {
                                ParseMode = messageTemplate.ParseMode.ToString(),
                                DisableWebPagePreview = disableWebPagePreview,
@@ -75,15 +101,14 @@
         }
 
         public Task<HttpResponseMessage> EditMessageAsync(
-            long chatId,
             long messageId,
             string text,
             ParseMode parseMode,
             bool disableWebPagePreview,
             IReplyMarkup replyMarkup)
         {
-            return MakeRequest("editMessageText",
-                           new EditMessageRequest(chatId, messageId, text)
+            return MakeRequestAsync("editMessageText",
+                           new EditMessageRequest(ChatId, messageId, text)
                            {
                                ParseMode = parseMode.ToString(),
                                DisableWebPagePreview = disableWebPagePreview,
@@ -92,13 +117,12 @@
         }
 
         public Task<HttpResponseMessage> EditMessageAsync(
-            long chatId,
             long messageId,
             MessageTemplate messageTemplate,
             bool disableWebPagePreview)
         {
-            return MakeRequest("editMessageText",
-                           new EditMessageRequest(chatId, messageId, messageTemplate.Text)
+            return MakeRequestAsync("editMessageText",
+                           new EditMessageRequest(ChatId, messageId, messageTemplate.Text)
                            {
                                ParseMode = messageTemplate.ParseMode.ToString(),
                                DisableWebPagePreview = disableWebPagePreview,
@@ -106,15 +130,27 @@
                            });
         }
 
-        public Task<HttpResponseMessage> AnswerCallbackQuery(
+        public Task<HttpResponseMessage> AnswerCallbackQueryAsync(
             string callbackQueryId,
             string text)
         {
-            return MakeRequest("answerCallbackQuery",
+            return MakeRequestAsync("answerCallbackQuery",
                            new AnswerCallbackQueryRequest(callbackQueryId)
                            {
                                Text = text
                            });
         }
+
+        internal void EnhanceWithRequest(Request request)
+        {
+            _request = request;
+        }
+
+        private Task<HttpResponseMessage> MakeRequestAsync(string url, BaseRequest obj)
+        {
+            return _client.PostAsync(url, obj.ToHttpContent());
+        }
+
+        private string GetCacheKey(long chatId) => $"{CacheKeyPrefix}:{chatId}";
     }
 }
