@@ -13,7 +13,7 @@
             var replyMarkup = new InlineKeyboardMarkup()
                 .AddRow(new InlineKeyboardButton("Lab 2", callbackData: $"{GetCommandName<FileCommand>()}:fileId=pvms_lab2.pdf"));
 
-            await SendMessageAsync(MessageTemplate.Create()
+            await EditMessageAsync(request.MessageId, MessageTemplate.Create()
                 .SetText("Choose your lab:")
                 .SetMarkup(replyMarkup));
 

@@ -5,6 +5,7 @@
     using System.Text;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Caching.Distributed;
+    using Microsoft.Extensions.Logging;
     using TelegramBotApi.Models.ChatState;
     using TelegramBotApi.Models.Update;
     using TelegramBotApi.Types;
@@ -15,6 +16,7 @@
     {
         private readonly HttpClient _client;
         private readonly IDistributedCache _cache;
+        private readonly ILogger<TelegramBot> _logger;
         private Request _request = null!;
 
         private const string CacheKeyPrefix = "tgbot";
@@ -23,10 +25,12 @@
         private string CacheKey => GetCacheKey(_request.ChatId);
 
         public TelegramBot(HttpClient client,
-            IDistributedCache cache)
+            IDistributedCache cache,
+            ILogger<TelegramBot> logger)
         {
             _client = client;
             _cache = cache;
+            _logger = logger;
         }
 
         public async Task SetChatStateAsync(ChatState chatState)
@@ -64,6 +68,8 @@
             string webhookUri,
             string[] allowedUpdates = null!)
         {
+            _logger.LogInformation("Webhook path: {webhookUri}", webhookUri);
+
             return MakeRequestAsync("setWebhook", new SetWebhookRequest(webhookUri, allowedUpdates));
         }
 

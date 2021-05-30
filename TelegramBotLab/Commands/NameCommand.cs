@@ -29,7 +29,7 @@
                 (markup, pair) =>
                     markup.AddRow(new InlineKeyboardButton(pair.Value, callbackData: pair.Key)));
 
-            await EditMessageAsync(request.MessageId, MessageTemplate.Create()
+            await SendMessageAsync(MessageTemplate.Create()
                 .SetText("First, choose the subject:")
                 .SetMarkup(replyMarkup));
         }
