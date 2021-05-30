@@ -8,9 +8,9 @@
 
     public class UndefinedCommand : CommandBase
     {
-        public async Task Invoke(MessageRequest request)
+        public async Task Invoke()
         {
-            await SendResponseAsync(MessageTemplate.Create().SetText("Undefined command"));
+            await SendMessageAsync(MessageTemplate.Create().SetText("Undefined command"));
         }
     }
 }

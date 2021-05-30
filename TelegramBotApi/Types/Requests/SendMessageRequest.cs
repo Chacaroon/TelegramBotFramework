@@ -25,18 +25,13 @@
                 : value;
         }
         
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool DisableWebPagePreview { get; set; }
         
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public bool DisableNotification { get; set; }
         
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public long ReplyToMessageId { get; set; }
         
-        [JsonProperty(DefaultValueHandling = DefaultValueHandling.Ignore)]
         public IReplyMarkup? ReplyMarkup { get; set; }
-
 
         private string? _parseMode;
     }

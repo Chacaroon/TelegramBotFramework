@@ -17,6 +17,8 @@
         
         public string Data { get; set; }
 
+        public string InlineMessageId { get; set; }
+
         #region Helpers
 
         private readonly Regex _commandRegex = new(@"^([A-z]+):?", RegexOptions.IgnoreCase | RegexOptions.Compiled);

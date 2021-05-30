@@ -51,7 +51,7 @@
             {
                 { IsCallbackQuery: true } => update.CallbackQuery!.GetCommand(),
                 { IsMessage: true, Message: { IsCommand: true } } => update.Message.GetCommand(),
-                { IsMessage: true, Message: { IsCommand: false } } => (await _telegramBot.GetChatStateAsync()).WaitingFor,
+                { IsMessage: true, Message: { IsCommand: false } } => (await _telegramBot.GetChatStateAsync(true)).WaitingFor,
                 _ => null
             };
 

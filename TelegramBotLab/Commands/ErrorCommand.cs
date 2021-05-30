@@ -8,7 +8,8 @@
     {
         public async Task Invoke()
         {
-            await SendResponseAsync(MessageTemplate.Create().SetText("Something went wrong"));
+            await SendMessageAsync(MessageTemplate.Create()
+                .SetText("Something went wrong =("));
         }
     }
 }

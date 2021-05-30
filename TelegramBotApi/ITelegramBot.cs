@@ -1,15 +1,16 @@
 ﻿namespace TelegramBotApi
 {
+    using System.IO;
     using System.Net.Http;
     using System.Threading.Tasks;
     using TelegramBotApi.Models.ChatState;
-using TelegramBotApi.Models.Update;
+    using TelegramBotApi.Models.Update;
     using TelegramBotApi.Types;
     using TelegramBotApi.Types.Abstraction;
 
     public interface ITelegramBot
     {
-        Task<ChatState> GetChatStateAsync();
+        Task<ChatState> GetChatStateAsync(bool clearState = false);
 
         Task SetChatStateAsync(ChatState chatState);
 
@@ -42,7 +43,9 @@ using TelegramBotApi.Models.Update;
             long messageId,
             MessageTemplate messageTemplate,
             bool disableWebPagePreview = default);
-        
+
+        public Task<HttpResponseMessage> SendFileAsync(FileStream document);
+
         Task<HttpResponseMessage> AnswerCallbackQueryAsync(
             string callbackQueryId,
             string text = default!);

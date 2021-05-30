@@ -5,12 +5,12 @@
     using System.Net.Http;
     using System.Text;
 
-    [JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy))]
+    [JsonObject(NamingStrategyType = typeof(SnakeCaseNamingStrategy), ItemNullValueHandling = NullValueHandling.Ignore)]
     internal class BaseRequest
     {
-        public StringContent ToHttpContent()
+        public virtual HttpContent ToHttpContent()
         {
-            return new(
+            return new StringContent(
                 JsonConvert.SerializeObject(this),
                 Encoding.UTF8,
                 "application/json");

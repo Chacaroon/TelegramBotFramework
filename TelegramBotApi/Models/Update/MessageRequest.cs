@@ -4,6 +4,8 @@
 
     public class MessageRequest : Request
     {
+        public int MessageId { get; set; }
+
         public string Text { get; set; }
     }
 

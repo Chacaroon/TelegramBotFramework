@@ -1,5 +1,6 @@
 ﻿namespace TelegramBotApi
 {
+    using System.IO;
     using System.Net.Http;
     using System.Text;
     using System.Threading.Tasks;
@@ -39,20 +40,22 @@
             await _cache.SetAsync(CacheKey, Encoding.ASCII.GetBytes(chatState.WaitingFor!));
         }
 
-        public async Task<ChatState> GetChatStateAsync()
+        public async Task<ChatState> GetChatStateAsync(bool clearState = false)
         {
             var chatStateBytes = await _cache.GetAsync(CacheKey);
 
             if (chatStateBytes == null)
             {
                 return new ChatState();
-            } 
+            }
 
             var chatStateString = Encoding.ASCII.GetString(chatStateBytes);
             var chatState = new ChatState
             {
                 WaitingFor = chatStateString
             };
+
+            await _cache.RemoveAsync(CacheKey);
 
             return chatState;
         }
@@ -100,6 +103,11 @@
                            });
         }
 
+        public Task<HttpResponseMessage> SendFileAsync(FileStream document)
+        {
+            return MakeRequestAsync("sendDocument", new SendFileRequest(ChatId, document));
+        }
+
         public Task<HttpResponseMessage> EditMessageAsync(
             long messageId,
             string text,
@@ -141,7 +149,7 @@
                            });
         }
 
-        internal void EnhanceWithRequest(Request request)
+        void ITelegramBot.EnhanceWithRequest(Request request)
         {
             _request = request;
         }
@@ -151,6 +159,9 @@
             return _client.PostAsync(url, obj.ToHttpContent());
         }
 
-        private string GetCacheKey(long chatId) => $"{CacheKeyPrefix}:{chatId}";
+        private string GetCacheKey(long chatId)
+        {
+            return $"{CacheKeyPrefix}:{chatId}";
+        }
     }
 }

@@ -3,21 +3,20 @@
     using System.Threading.Tasks;
     using TelegramBotApi.Commands;
     using TelegramBotApi.Models.ChatState;
-    using TelegramBotApi.Models.Update;
     using TelegramBotApi.Types;
 
     public class StartCommand : CommandBase
     {
-        public async Task Invoke(MessageRequest request)
+        public async Task Invoke()
         {
             await TelegramBot.SetChatStateAsync(new ChatState
             {
-                WaitingFor = "some"
+                WaitingFor = GetCommandName<NameCommand>()
             });
 
-            await SendResponseAsync(
+            await SendMessageAsync(
                 MessageTemplate.Create()
-                    .SetText("Hello!"));
+                    .SetText("Hello! What's your name?"));
         }
     }
 }

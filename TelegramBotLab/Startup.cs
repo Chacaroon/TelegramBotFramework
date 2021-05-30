@@ -5,7 +5,6 @@ namespace TelegramBotLab
     using Microsoft.Extensions.Configuration;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Hosting;
-    using StackExchange.Redis;
     using TelegramBotApi.IoC;
 
     public class Startup
@@ -48,7 +47,7 @@ namespace TelegramBotLab
             app.UseCors();
 
             app.UseRouting();
-            
+
             app.UseTelegramBot();
         }
     }
