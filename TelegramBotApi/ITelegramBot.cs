@@ -5,6 +5,7 @@
     using System.Threading.Tasks;
     using TelegramBotApi.Models.ChatState;
     using TelegramBotApi.Models.Update;
+using TelegramBotApi.Services.Abstraction;
     using TelegramBotApi.Types;
     using TelegramBotApi.Types.Abstraction;
 
@@ -49,6 +50,8 @@
         Task<HttpResponseMessage> AnswerCallbackQueryAsync(
             string callbackQueryId,
             string text = default!);
+
+        Task InvokeCommand(string commandName);
 
         internal void EnhanceWithRequest(Request request);
     }

@@ -53,6 +53,7 @@
             });
 
             services.AddScoped<IWebhookService, WebhookService>();
+            services.AddScoped<ICommandInvoker, CommandInvoker>();
 
             services.AddHttpContextAccessor();
         }

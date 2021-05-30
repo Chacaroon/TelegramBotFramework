@@ -17,7 +17,7 @@
             { new List<string> { "пз", "практичес.+" }, "pz" }
         };
 
-        private static readonly Dictionary<List<string>, int> Numbers = new()
+        private static readonly Dictionary<List<string>, int?> Numbers = new()
         {
             { new List<string> { "певр" }, 1 },
             { new List<string> { "втор" }, 2 },
@@ -51,7 +51,7 @@
                 .FirstOrDefault();
         }
 
-        public static int ResolveNumber(string text)
+        public static int? ResolveNumber(string text)
         {
             var words = RedundantChars.Replace(text.ToLower(), string.Empty).Split(" ");
 

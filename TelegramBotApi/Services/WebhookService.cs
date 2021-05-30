@@ -1,12 +1,9 @@
 ﻿namespace TelegramBotApi.Services
 {
     using System;
-    using System.Linq;
-    using System.Reflection;
     using System.Threading.Tasks;
     using AutoMapper;
     using Microsoft.Extensions.Logging;
-    using TelegramBotApi.Commands;
     using TelegramBotApi.Models.Update;
     using TelegramBotApi.Profiles;
     using TelegramBotApi.Services.Abstraction;
@@ -16,6 +13,7 @@
     {
         private readonly ICommandResolver _commandResolver;
         private readonly ITelegramBot _telegramBot;
+        private readonly ICommandInvoker _commandInvoker;
         private readonly IMapper _mapper;
         private readonly ILogger<WebhookService> _logger;
 
@@ -24,10 +22,12 @@
 
         public WebhookService(ICommandResolver commandResolver,
             ITelegramBot telegramBot,
+            ICommandInvoker commandInvoker,
             ILogger<WebhookService> logger)
         {
             _commandResolver = commandResolver;
             _telegramBot = telegramBot;
+            _commandInvoker = commandInvoker;
             _logger = logger;
 
             _mapper = new Mapper(new MapperConfiguration(x => x.AddProfile<RequestProfile>()));
@@ -51,7 +51,7 @@
             {
                 { IsCallbackQuery: true } => update.CallbackQuery!.GetCommand(),
                 { IsMessage: true, Message: { IsCommand: true } } => update.Message.GetCommand(),
-                { IsMessage: true, Message: { IsCommand: false } } => (await _telegramBot.GetChatStateAsync(true)).WaitingFor,
+                { IsMessage: true, Message: { IsCommand: false } } => (await _telegramBot.GetChatStateAsync(true)).WaitingFor ?? "text",
                 _ => null
             };
 
@@ -73,62 +73,14 @@
             {
                 _logger.LogInformation("Invoke {commandName} command", commandName);
 
-                await InvokeCommand(command, request);
+                await _commandInvoker.InvokeCommand(command, request);
             }
             catch (Exception e)
             {
                 _logger.LogError(e, "An error was occurred during invoke {commandName} command", commandName);
 
-                await InvokeCommand(_commandResolver.Resolve(ErrorCommandName)!, request);
+                await _commandInvoker.InvokeCommand(command, request);
             }
-        }
-
-        private Task InvokeCommand(CommandBase command, Request request)
-        {
-            command.TelegramBot.EnhanceWithRequest(request);
-
-            var method = FindCommandEntryPoint(command, request);
-
-            return (Task)method.Invoke(
-                command,
-                BindingFlags.Public | BindingFlags.Instance,
-                null,
-                method.GetParameters().Length == 0
-                    ? null
-                    : new object?[] { request },
-                null)!;
-        }
-
-        private MethodInfo FindCommandEntryPoint(CommandBase command, Request request)
-        {
-            var methods = command.GetType().GetMethods(BindingFlags.Public | BindingFlags.Instance)
-                .Where(x => x.Name == "Invoke")
-                .Where(x =>
-                {
-                    var parameters = x.GetParameters();
-
-                    if (!parameters.Any())
-                        return true;
-
-                    return parameters.Length == 1 && parameters.Single().ParameterType == request.GetType();
-                })
-                .ToArray();
-
-            if (!methods.Any())
-            {
-                // TODO: Throw proper exception
-                throw new Exception();
-            }
-
-            if (methods.Length > 1)
-            {
-                // TODO: Throw proper exception
-                throw new Exception();
-            }
-
-            var method = methods.Single();
-
-            return method;
         }
 
         private Request MapUpdateToRequest(Update update)

@@ -42,6 +42,11 @@
             res.EnsureSuccessStatusCode();
         }
 
+        protected Task Redirect(string commandName)
+        {
+            return TelegramBot.InvokeCommand(commandName);
+        }
+
         protected string GetCommandName<TCommand>() where TCommand : CommandBase
         {
             return typeof(TCommand).Name.Replace("Command", string.Empty, StringComparison.InvariantCultureIgnoreCase);

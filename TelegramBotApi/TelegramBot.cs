@@ -8,14 +8,18 @@
     using Microsoft.Extensions.Logging;
     using TelegramBotApi.Models.ChatState;
     using TelegramBotApi.Models.Update;
+    using TelegramBotApi.Services.Abstraction;
     using TelegramBotApi.Types;
     using TelegramBotApi.Types.Abstraction;
     using TelegramBotApi.Types.Requests;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
     internal class TelegramBot : ITelegramBot
     {
         private readonly HttpClient _client;
         private readonly IDistributedCache _cache;
+        private readonly ICommandResolver _commandResolver;
+        private readonly ICommandInvoker _commandInvoker;
         private readonly ILogger<TelegramBot> _logger;
         private Request _request = null!;
 
@@ -26,10 +30,14 @@
 
         public TelegramBot(HttpClient client,
             IDistributedCache cache,
+            ICommandResolver commandResolver,
+            ICommandInvoker commandInvoker,
             ILogger<TelegramBot> logger)
         {
             _client = client;
             _cache = cache;
+            _commandResolver = commandResolver;
+            _commandInvoker = commandInvoker;
             _logger = logger;
         }
 
@@ -153,6 +161,13 @@
                            {
                                Text = text
                            });
+        }
+
+        public Task InvokeCommand(string commandName)
+        {
+            var command = _commandResolver.Resolve(commandName) ?? _commandResolver.Resolve("undefined")!;
+
+            return _commandInvoker.InvokeCommand(command, _request);
         }
 
         void ITelegramBot.EnhanceWithRequest(Request request)
